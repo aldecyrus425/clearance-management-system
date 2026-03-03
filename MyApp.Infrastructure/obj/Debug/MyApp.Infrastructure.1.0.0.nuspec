@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>MyApp.Infrastructure</id>
+    <version>1.0.0</version>
+    <authors>MyApp.Infrastructure</authors>
+    <description>Package Description</description>
+    <repository type="git" commit="8f431e95d26122431f755b3a4b0c3f33ff3a8daf" />
+    <dependencies>
+      <group targetFramework="net9.0">
+        <dependency id="MyApp.Application" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="MyApp.Domain" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="9.0.13" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="9.0.13" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Users\aldec\source\repos\ClearanceManagementSystem\MyApp.Infrastructure\bin\Debug\net9.0\MyApp.Infrastructure.dll" target="lib\net9.0\MyApp.Infrastructure.dll" />
+  </files>
+</package>
