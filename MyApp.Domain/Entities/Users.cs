@@ -55,7 +55,7 @@ namespace MyApp.Domain.Entities
             IsActive = !IsActive;
         }
 
-        public void UpdateUser(string firstname, string? middlename, string lastname, string email, string hashPassword, int roleId)
+        public void UpdateUser(string firstname, string? middlename, string lastname, string email, int roleId)
         {
             if (string.IsNullOrWhiteSpace(firstname))
                 throw new ArgumentException("First name is required.", nameof(firstname));
@@ -69,8 +69,7 @@ namespace MyApp.Domain.Entities
             if (!IsValidEmail(email))
                 throw new ArgumentException("Email format is invalid.", nameof(email));
 
-            if (string.IsNullOrWhiteSpace(hashPassword))
-                throw new ArgumentException("Password hash is required.", nameof(hashPassword));
+            
 
             if (roleId <= 0)
                 throw new ArgumentException("RoleId must be greater than zero.", nameof(roleId));
@@ -79,7 +78,6 @@ namespace MyApp.Domain.Entities
             MiddleName = middlename;
             LastName = lastname;
             Email = email;
-            PasswordHash = hashPassword;
             RoleId = roleId;
             IsActive = false;
         }
