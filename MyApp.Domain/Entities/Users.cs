@@ -94,5 +94,10 @@ namespace MyApp.Domain.Entities
                 return false;
             }
         }
+
+        public void UpdatePassword(string password)
+        {
+            PasswordHash = password;
+        }
     }
 }
