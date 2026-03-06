@@ -148,24 +148,157 @@ namespace MyApp.Application.Services
             }
         }
 
-        public Task<ResponseDTO<IEnumerable<ShowUserDTO>>> getAllUserAsync()
+        public async Task<ResponseDTO<IEnumerable<ShowUserDTO>>> getAllUserAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var response = await _userRepository.getAllUserAsync();
+                var users = response.Select(u => new ShowUserDTO
+                {
+                    UserId = u.UserId,
+                    FullName = u.FirstName + " " + u.MiddleName + " " + u.LastName,
+                    Email = u.Email,
+                    Role = u.Roles.RoleName,
+                    IsActive = u.IsActive,
+                });
+
+                return new ResponseDTO<IEnumerable<ShowUserDTO>>
+                {
+                    Success = true,
+                    Message = "User's Lists.",
+                    Data = users
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<IEnumerable<ShowUserDTO>>
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
         }
 
-        public Task<ResponseDTO<ShowUserDTO>> getUserByIdAsync(int id)
+        public async Task<ResponseDTO<ShowUserDTO>> getUserByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var response = await _userRepository.getUserByIDAsync(id);
+                if(response == null)
+                {
+                    return new ResponseDTO<ShowUserDTO>
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                return new ResponseDTO<ShowUserDTO>
+                {
+                    Success = true,
+                    Message = "User information.",
+                    Data = new ShowUserDTO
+                    {
+                        UserId = response.UserId,
+                        FullName = response.FirstName + " " + response.MiddleName + " " + response.LastName,
+                        Email = response.Email,
+                        Role = response.Roles.RoleName,
+                        IsActive = response.IsActive,
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<ShowUserDTO>
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
         }
 
-        public Task<ResponseDTO<string>> toggleUserStatusAsync(int id)
+        public async Task<ResponseDTO<string>> toggleUserStatusAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await _userRepository.getUserByIDAsync(id);
+                if(user == null)
+                {
+                    return new ResponseDTO<string>
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                user.ToggleUser();
+                await _userRepository.saveChangesAsync();
+
+                return new ResponseDTO<string>
+                {
+                    Success = true,
+                    Message = "User toggled successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<string>
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
         }
 
-        public Task<ResponseDTO<ShowUserDTO>> updateUserAsync(UpdateUserDTO dto)
+        public async Task<ResponseDTO<ShowUserDTO>> updateUserAsync(UpdateUserDTO dto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var response = await _userRepository.getUserByIDAsync(dto.UserId);
+                if (response == null)
+                {
+                    return new ResponseDTO<ShowUserDTO>
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                response.UpdateUser(dto.FirstName, dto.MiddleName, dto.LastName, dto.Email, dto.RoleId);
+                await _userRepository.saveChangesAsync();
+
+                return new ResponseDTO<ShowUserDTO>
+                {
+                    Success = true,
+                    Message = "User updated successfully.",
+                    Data = new ShowUserDTO
+                    {
+                        UserId = response.UserId,
+                        FullName = response.FirstName + " " + response.MiddleName + " " + response.LastName,
+                        Email = response.Email,
+                        Role = response.Roles.RoleName,
+                        IsActive = response.IsActive,
+                    }
+                };
+
+            }
+            catch (ArgumentException ex)
+            {
+                return new ResponseDTO<ShowUserDTO>
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
+
+            catch (Exception ex)
+            {
+                return new ResponseDTO<ShowUserDTO>
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
         }
     }
 }
