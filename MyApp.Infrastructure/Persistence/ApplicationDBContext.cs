@@ -16,6 +16,7 @@ namespace MyApp.Infrastructure.Persistence
         }
 
         public DbSet<Users> Users { get; set; }
+        public DbSet<Students> Students { get; set; }
        
 
     }

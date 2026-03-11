@@ -1,5 +1,4 @@
-﻿using MyApp.Application.DTO.User;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace MyApp.Application.DTO.Student
 {
-    public class CreateStudentDTO
+    public class UpdateStudentDTO
     {
-        public CreateUserDTO User { get; set; }
+        public int StudentID { get; set; }
+        public string FirstName { get; set; }
+        public string? MiddleName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
         public string StudentNumber { get; set; }
         public string Course { get; set; }
         public string YearLevel { get; set; }

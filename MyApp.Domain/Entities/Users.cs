@@ -79,7 +79,27 @@ namespace MyApp.Domain.Entities
             LastName = lastname;
             Email = email;
             RoleId = roleId;
-            IsActive = false;
+        }
+
+        public void UpdateUserNameAndEmail(string firstname, string? middlename, string lastname, string email)
+        {
+            if (string.IsNullOrWhiteSpace(firstname))
+                throw new ArgumentException("First name is required.", nameof(firstname));
+
+            if (string.IsNullOrWhiteSpace(lastname))
+                throw new ArgumentException("Last name is required.", nameof(lastname));
+
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email is required.", nameof(email));
+
+            if (!IsValidEmail(email))
+                throw new ArgumentException("Email format is invalid.", nameof(email));
+
+
+            FirstName = firstname;
+            MiddleName = middlename;
+            LastName = lastname;
+            Email = email;
         }
 
         private bool IsValidEmail(string email)
