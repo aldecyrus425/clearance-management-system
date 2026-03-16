@@ -1,0 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MyApp.Application.DTO.SchoolYear
+{
+    public class UpdateSchoolYearDTO
+    {
+        public int SchoolyearID { get; set; }
+        public DateOnly YearStart { get; set; }
+        public DateOnly YearEnd { get; set; }
+        public string Semester { get; set; }
+    }
+}
