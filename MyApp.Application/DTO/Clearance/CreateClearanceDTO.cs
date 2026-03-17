@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace MyApp.Application.DTO.Clearance
 {
-    public class UpdateClearanceStatusDTO
+    public class CreateClearanceDTO
     {
-        public int ClearanceId { get; set; }
-        public string Status { get; set; }
-        public string Remarks { get; set; }
+        public int StudentId { get; set; }
+        public int SchoolYearId { get; set; }
     }
 }

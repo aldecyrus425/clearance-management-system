@@ -19,6 +19,10 @@ namespace MyApp.Infrastructure.Persistence
         public DbSet<Students> Students { get; set; }
         public DbSet<SchoolYears> SchoolYears { get; set; }
         public DbSet<Roles> Roles { get; set; }
+        public DbSet<Offices> Offices { get; set; }
+        public DbSet<Clearances> Clearances { get; set; }
+
+        public DbSet<ClearanceStatuses> ClearanceStatuses { get; set; }
        
 
     }

@@ -13,10 +13,23 @@ namespace MyApp.Application.Services
     public class SchoolYearServices : ISchoolYearServices
     {
         private readonly ISchoolYearRepository _schoolYearRepository;
+        private readonly IStudentRespository _studentRepository;
+        private readonly IClearancesRespository _clearancesRepository;
+        private readonly IClearanceStatusRepository _clearanceStatusRepository;
+        private readonly IOfficeRepository _officeRepository;
 
-        public SchoolYearServices(ISchoolYearRepository schoolYearRepository)
+        public SchoolYearServices(
+            ISchoolYearRepository schoolYearRepository, 
+            IStudentRespository studentRepository,
+            IClearancesRespository clearancesRepository,
+            IClearanceStatusRepository clearanceStatusRepository,
+            IOfficeRepository officeRepository)
         {
             _schoolYearRepository = schoolYearRepository;
+            _studentRepository = studentRepository;
+            _clearancesRepository = clearancesRepository;
+            _clearanceStatusRepository = clearanceStatusRepository;
+            _officeRepository = officeRepository;
         }
 
         public async Task<ResponseDTO<IEnumerable<ShowSchoolYearDTO>>> getAllSchoolYearAsync()
@@ -201,32 +214,39 @@ namespace MyApp.Application.Services
             try
             {
                 var allYears = await _schoolYearRepository.getAllSchoolYearAsync();
-                var target = allYears.FirstOrDefault(s => s.SchoolYearId == id);
+                var target = await _schoolYearRepository.getSchoolYearByIDAsync(id);
 
                 if (target == null)
-                {
-                    return new ResponseDTO<ShowSchoolYearDTO>
-                    {
-                        Success = false,
-                        Message = "School year not found",
-                        Data = null
-                    };
-                }
+                    return new ResponseDTO<ShowSchoolYearDTO> { Success = false, Message = "School year not found" };
 
                 var activeYear = allYears.FirstOrDefault(s => s.IsActive);
                 if (activeYear != null && activeYear.SchoolYearId != id)
-                {
                     activeYear.SetInactive();
-                }
 
                 target.SetActive();
-
                 await _schoolYearRepository.saveChangesAsync();
+
+                // --- AUTOMATIC CLEARANCE CREATION ---
+                var students = await _studentRepository.getAllStudentsAsync();
+                var offices = await _officeRepository.getAllOfficesAsync();
+
+                foreach (var student in students)
+                {
+                    var clearance = new Clearances(student.StudentsId, target.SchoolYearId);
+                    await _clearancesRepository.AddClearanceAsync(clearance);
+
+                    // create statuses for all offices
+                    var statuses = offices.Select(o => new ClearanceStatuses(clearance.ClearanceId, o.OfficeId));
+                    await _clearanceStatusRepository.addRangeAsync(statuses);
+                }
+
+                await _clearancesRepository.SaveChangesAsync();
+                await _clearanceStatusRepository.saveChangesAsync();
 
                 return new ResponseDTO<ShowSchoolYearDTO>
                 {
                     Success = true,
-                    Message = "School year activated successfully",
+                    Message = "School year activated and clearances created successfully",
                     Data = new ShowSchoolYearDTO
                     {
                         SchoolYearId = target.SchoolYearId,
@@ -240,7 +260,7 @@ namespace MyApp.Application.Services
                 return new ResponseDTO<ShowSchoolYearDTO>
                 {
                     Success = false,
-                    Message = ex.Message,
+                    Message = ex.Message
                 };
             }
         }
