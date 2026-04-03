@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MyApp.Application.DTO.Pagination;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Persistence;
@@ -23,7 +24,9 @@ namespace MyApp.Infrastructure.Repository
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            return user;
+            return await _context.Users
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.UserId == user.UserId);
         }
 
         public async Task<bool> deleteUserAsync(int id)
@@ -37,9 +40,30 @@ namespace MyApp.Infrastructure.Repository
 
         }
 
-        public async Task<IEnumerable<Users>> getAllUserAsync()
+        public async Task<(IEnumerable<Users>, int totalCount)> getAllUserAsync(PaginationDTO dto)
         {
-            return await _context.Users.AsNoTracking().ToListAsync();
+            var query = _context.Users
+                .Include(u => u.Roles)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(dto.Search))
+            {
+                query = query.Where(u =>
+                    u.FirstName.Contains(dto.Search) ||
+                    u.LastName.Contains(dto.Search) ||
+                    u.Email.Contains(dto.Search)
+                );
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var users = await query
+                .Skip((dto.PageNumber - 1) * dto.PageSize)
+                .Take(dto.PageSize)
+                .ToListAsync();
+
+            return (users, totalCount);
         }
 
         public async Task<Users?> getUserByIDAsync(int id)

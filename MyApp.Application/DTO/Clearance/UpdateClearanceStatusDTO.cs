@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace MyApp.Application.DTO.Clearance
 {
-    // This DTO is for Office Actions Cashier, Librarian, etc.
     public class UpdateClearanceStatusDTO
     {
         public int ClearanceId { get; set; }

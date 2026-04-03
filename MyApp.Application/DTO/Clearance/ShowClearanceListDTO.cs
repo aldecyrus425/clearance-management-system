@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace MyApp.Application.DTO.Clearance
 {
-    // Admin View All Clearance DTO
     public class ShowClearanceListDTO
     {
         public int ClearanceId { get; set; }
