@@ -1,4 +1,5 @@
-﻿using MyApp.Application.DTO.Response;
+﻿using MyApp.Application.DTO.Pagination;
+using MyApp.Application.DTO.Response;
 using MyApp.Application.DTO.Roles;
 using MyApp.Domain.Entities;
 using System;
@@ -11,7 +12,7 @@ namespace MyApp.Application.Interfaces.Services
 {
     public interface IRoleServices
     {
-        Task<ResponseDTO<IEnumerable<ShowRoleDTO>>> GetAllRolesAsync();
+        Task<ResponseDTO<IEnumerable<ShowRoleDTO>>> GetAllRolesAsync(PaginationDTO dto);
 
         Task<ResponseDTO<ShowRoleDTO>> GetRoleByIdAsync(int roleId);
 

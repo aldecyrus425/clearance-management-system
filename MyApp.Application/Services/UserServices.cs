@@ -1,4 +1,5 @@
-﻿using MyApp.Application.DTO.Response;
+﻿using MyApp.Application.DTO.Pagination;
+using MyApp.Application.DTO.Response;
 using MyApp.Application.DTO.User;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Application.Interfaces.Services;
@@ -28,7 +29,6 @@ namespace MyApp.Application.Services
                 var user = new Users(dto.FirstName, dto.MiddleName, dto.LastName, dto.Email, hashedPassword, dto.RoleId);
 
                 var response = await _userRepository.addUserAsync(user);
-
 
                 return new ResponseDTO<ShowUserDTO>
                 {
@@ -148,11 +148,12 @@ namespace MyApp.Application.Services
             }
         }
 
-        public async Task<ResponseDTO<IEnumerable<ShowUserDTO>>> getAllUserAsync()
+        public async Task<ResponseDTO<IEnumerable<ShowUserDTO>>> getAllUserAsync(PaginationDTO dto)
         {
             try
             {
-                var response = await _userRepository.getAllUserAsync();
+                var (response, totalCount) = await _userRepository.getAllUserAsync(dto);
+
                 var users = response.Select(u => new ShowUserDTO
                 {
                     UserId = u.UserId,
@@ -166,7 +167,11 @@ namespace MyApp.Application.Services
                 {
                     Success = true,
                     Message = "User's Lists.",
-                    Data = users
+                    Data = users,
+                    PageNumber = dto.PageNumber,
+                    PageSize = dto.PageSize,
+                    TotalRecords = totalCount,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)dto.PageSize)
                 };
             }
             catch (Exception ex)

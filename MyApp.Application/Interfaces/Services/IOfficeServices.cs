@@ -1,4 +1,5 @@
 ﻿using MyApp.Application.DTO.Office;
+using MyApp.Application.DTO.Pagination;
 using MyApp.Application.DTO.Response;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace MyApp.Application.Interfaces.Services
 {
     public interface IOfficeServices
     {
-        Task<ResponseDTO<IEnumerable<ShowOfficeDTO>>> getAllOfficeAsync();
+        Task<ResponseDTO<IEnumerable<ShowOfficeDTO>>> getAllOfficeAsync(PaginationDTO dto);
         Task<ResponseDTO<ShowOfficeDTO>> getOfficeAsync(int id);
         Task<ResponseDTO<ShowOfficeDTO>> createOfficeAsync(CreateOfficeDTO dto);
         Task<ResponseDTO<ShowOfficeDTO>> activateOfficeAsync(int id);

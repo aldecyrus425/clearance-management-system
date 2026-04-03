@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MyApp.Application.DTO.Pagination;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Persistence;
@@ -34,13 +35,32 @@ namespace MyApp.Infrastructure.Repository
                 .FirstOrDefaultAsync(c => c.ClearanceId == id);
         }
 
-        public async Task<IEnumerable<Clearances>> GetAllClearancesAsync()
+        public async Task<(IEnumerable<Clearances>, int totalCounts)> GetAllClearancesAsync(PaginationDTO dto)
         {
-            return await _dbContext.Clearances
+            var query = _dbContext.Clearances
                 .AsNoTracking()
                 .Include(c => c.Students)
+                .ThenInclude(u => u.Users)
                 .Include(c => c.SchoolYears)
+                .AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(dto.Search))
+            {
+                query = query.Where(c => 
+                c.Students.Users.FirstName.Contains(dto.Search) ||
+                c.Students.Users.LastName.Contains(dto.Search) ||
+                c.Students.StudentNumber.Contains(dto.Search) ||
+                c.OverallStatus.Contains(dto.Search));
+            }
+
+            var totalCounts = await query.CountAsync();
+
+            var clearances = await query
+                .Skip((dto.PageNumber - 1) * dto.PageSize)
+                .Take(dto.PageSize)
                 .ToListAsync();
+
+            return (clearances, totalCounts);
         }
 
         public async Task<IEnumerable<Clearances>> GetClearancesByStudentAsync(int studentId)

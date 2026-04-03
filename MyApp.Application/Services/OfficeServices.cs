@@ -1,4 +1,5 @@
 ﻿using MyApp.Application.DTO.Office;
+using MyApp.Application.DTO.Pagination;
 using MyApp.Application.DTO.Response;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Application.Interfaces.Services;
@@ -146,18 +147,22 @@ namespace MyApp.Application.Services
             }
         }
 
-        public async Task<ResponseDTO<IEnumerable<ShowOfficeDTO>>> getAllOfficeAsync()
+        public async Task<ResponseDTO<IEnumerable<ShowOfficeDTO>>> getAllOfficeAsync(PaginationDTO dto)
         {
             try
             {
-                var offices = await _officeRepository.getAllOfficesAsync();
+                var (offices, totalCounts) = await _officeRepository.getAllOfficesAsync(dto);
 
                 var data = offices.Select(o => MapToDTO(o));
 
                 return new ResponseDTO<IEnumerable<ShowOfficeDTO>>
                 {
                     Success = true,
-                    Data = data
+                    Data = data,
+                    PageNumber = dto.PageNumber,
+                    PageSize = dto.PageSize,
+                    TotalRecords = totalCounts,
+                    TotalPages = (int)Math.Ceiling(totalCounts / (double)dto.PageSize)
                 };
             }
             catch (Exception ex)

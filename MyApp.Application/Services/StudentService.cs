@@ -1,4 +1,5 @@
-﻿using MyApp.Application.DTO.Response;
+﻿using MyApp.Application.DTO.Pagination;
+using MyApp.Application.DTO.Response;
 using MyApp.Application.DTO.Student;
 using MyApp.Application.DTO.User;
 using MyApp.Application.Interfaces;
@@ -53,9 +54,9 @@ namespace MyApp.Application.Services
                         StudentId = response.StudentsId,
                         StudentNumber = response.StudentNumber,
                         FullName = response.Users.FirstName + " " + response.Users.LastName,
-                        Course = response.Course,
-                        YearLevel = response.YearLevel,
-                        Section = response.Section
+                        Course = response.Course.Name,
+                        YearLevel = response.YearLevel.Name,
+                        Section = response.Section.Name
                     }
                 };
             }
@@ -102,9 +103,9 @@ namespace MyApp.Application.Services
                         StudentId = student.StudentsId,
                         StudentNumber = student.StudentNumber,
                         FullName = student.Users.FirstName + " " + student.Users.LastName,
-                        Course = student.Course,
-                        YearLevel = student.YearLevel,
-                        Section = student.Section
+                        Course = student.Course.Name,
+                        YearLevel = student.YearLevel.Name,
+                        Section = student.Section.Name
                     }
                 };
 
@@ -158,9 +159,9 @@ namespace MyApp.Application.Services
                         StudentId = response.StudentsId,
                         StudentNumber = response.StudentNumber,
                         FullName = response.Users.FirstName + " " + response.Users.LastName,
-                        Course = response.Course,
-                        YearLevel = response.YearLevel,
-                        Section = response.Section
+                        Course = response.Course.Name,
+                        YearLevel = response.YearLevel.Name,
+                        Section = response.Section.Name
                     }
                 };
             }
@@ -236,9 +237,9 @@ namespace MyApp.Application.Services
                         StudentId = response.StudentsId,
                         StudentNumber = response.StudentNumber,
                         FullName = response.Users.FirstName + " " + response.Users.LastName,
-                        Course = response.Course,
-                        YearLevel = response.YearLevel,
-                        Section = response.Section
+                        Course = response.Course.Name,
+                        YearLevel = response.YearLevel.Name,
+                        Section = response.Section.Name
                     }
                 };
             }
@@ -253,27 +254,31 @@ namespace MyApp.Application.Services
             }
         }
 
-        public async Task<ResponseDTO<IEnumerable<ShowStudentDTO>>> getAllStudentAsync()
+        public async Task<ResponseDTO<IEnumerable<ShowStudentDTO>>> getAllStudentAsync(PaginationDTO dto)
         {
             try
             {
-                var response = await _studentRepo.getAllStudentsAsync();
+                var (response, totalCount) = await _studentRepo.getAllStudentsAsync(dto);
 
                 var students = response.Select(s => new ShowStudentDTO
                 {
                     StudentId = s.StudentsId,
                     StudentNumber = s.StudentNumber,
                     FullName = s.Users.FirstName + " " + s.Users.LastName,
-                    Course = s.Course,
-                    YearLevel = s.YearLevel,
-                    Section = s.Section
+                    Course = s.Course.Name,
+                    YearLevel = s.YearLevel.Name,
+                    Section = s.Section.Name
                 });
 
                 return new ResponseDTO<IEnumerable<ShowStudentDTO>>
                 {
                     Success = true,
                     Message = "Student Lists",
-                    Data = students
+                    Data = students,
+                    PageNumber = dto.PageNumber,
+                    PageSize = dto.PageSize,
+                    TotalRecords = totalCount,
+                    TotalPages = (int)Math.Ceiling((double)totalCount / dto.PageSize)
                 };
             }
             catch (Exception ex)
@@ -310,9 +315,9 @@ namespace MyApp.Application.Services
                         StudentId = response.StudentsId,
                         StudentNumber = response.StudentNumber,
                         FullName = response.Users.FirstName + " " + response.Users.LastName,
-                        Course = response.Course,
-                        YearLevel = response.YearLevel,
-                        Section = response.Section
+                        Course = response.Course.Name,
+                        YearLevel = response.YearLevel.Name,
+                        Section = response.Section.Name
                     }
                 };
             }
@@ -354,9 +359,9 @@ namespace MyApp.Application.Services
                         StudentId = response.StudentsId,
                         StudentNumber = response.StudentNumber,
                         FullName = response.Users.FirstName + " " + response.Users.LastName,
-                        Course = response.Course,
-                        YearLevel = response.YearLevel,
-                        Section = response.Section
+                        Course = response.Course.Name,
+                        YearLevel = response.YearLevel.Name,
+                        Section = response.Section.Name
                     }
                 };
             }
@@ -399,9 +404,9 @@ namespace MyApp.Application.Services
                         StudentId = response.StudentsId,
                         StudentNumber = response.StudentNumber,
                         FullName = response.Users.FirstName + " " + response.Users.LastName,
-                        Course = response.Course,
-                        YearLevel = response.YearLevel,
-                        Section = response.Section
+                        Course = response.Course.Name,
+                        YearLevel = response.YearLevel.Name,
+                        Section = response.Section.Name
                     }
                 };
             }

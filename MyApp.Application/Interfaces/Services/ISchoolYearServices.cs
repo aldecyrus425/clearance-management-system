@@ -1,4 +1,5 @@
-﻿using MyApp.Application.DTO.Response;
+﻿using MyApp.Application.DTO.Pagination;
+using MyApp.Application.DTO.Response;
 using MyApp.Application.DTO.SchoolYear;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,7 @@ namespace MyApp.Application.Interfaces.Services
 {
     public interface ISchoolYearServices
     {
-        Task<ResponseDTO<IEnumerable<ShowSchoolYearDTO>>> getAllSchoolYearAsync();
-        Task<ResponseDTO<IEnumerable<ShowSchoolYearDTO>>> GetSchoolYearsBySemesterAsync(string semester);
+        Task<ResponseDTO<IEnumerable<ShowSchoolYearDTO>>> getAllSchoolYearAsync(PaginationDTO dto);
         Task<ResponseDTO<ShowSchoolYearDTO>> GetActiveSchoolYearAsync();
         Task<ResponseDTO<ShowSchoolYearDTO>> getSchoolYearByIdAsync(int id);
         Task<ResponseDTO<ShowSchoolYearDTO>> addSchoolYearAsync(CreateSchoolYearDTO dto);

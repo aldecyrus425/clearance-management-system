@@ -1,4 +1,5 @@
 ﻿using MyApp.Application.DTO.Clearance;
+using MyApp.Application.DTO.Pagination;
 using MyApp.Application.DTO.Response;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Domain.Entities;
@@ -77,16 +78,21 @@ namespace MyApp.Application.Services
             }
         }
 
-        public async Task<ResponseDTO<IEnumerable<ShowClearanceListDTO>>> getAllClearancesAsync()
+        public async Task<ResponseDTO<IEnumerable<ShowClearanceListDTO>>> getAllClearancesAsync(PaginationDTO dto)
         {
             try
             {
-                var clearances = await _clearanceRepository.GetAllClearancesAsync();
+                var (clearances, totalCount) = await _clearanceRepository.GetAllClearancesAsync(dto);
 
                 return new ResponseDTO<IEnumerable<ShowClearanceListDTO>>
                 {
                     Success = true,
-                    Data = clearances.Select(MapToDTO)
+                    Data = clearances.Select(MapToDTO),
+                    PageNumber = dto.PageNumber,
+                    PageSize = dto.PageSize,
+                    TotalRecords = totalCount,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)dto.PageSize)
+
                 };
             }
             catch (Exception ex)

@@ -1,4 +1,5 @@
-﻿using MyApp.Application.DTO.Response;
+﻿using MyApp.Application.DTO.Pagination;
+using MyApp.Application.DTO.Response;
 using MyApp.Application.DTO.Roles;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Application.Interfaces.Services;
@@ -15,11 +16,11 @@ namespace MyApp.Application.Services
             _roleRepo = roleRepo;
         }
 
-        public async Task<ResponseDTO<IEnumerable<ShowRoleDTO>>> GetAllRolesAsync()
+        public async Task<ResponseDTO<IEnumerable<ShowRoleDTO>>> GetAllRolesAsync(PaginationDTO dto)
         {
             try
             {
-                var roles = await _roleRepo.getAllRolesAsync();
+                var (roles, totalCounts) = await _roleRepo.getAllRolesAsync(dto);
 
                 var result = roles.Select(r => new ShowRoleDTO
                 {
@@ -31,7 +32,11 @@ namespace MyApp.Application.Services
                 {
                     Success = true,
                     Message = "Roles retrieved successfully",
-                    Data = result
+                    Data = result,
+                    PageNumber = dto.PageNumber,
+                    PageSize = dto.PageSize,
+                    TotalRecords = totalCounts,
+                    TotalPages = (int)Math.Ceiling(totalCounts / (double)dto.PageSize)
                 };
             }
             catch (Exception ex)

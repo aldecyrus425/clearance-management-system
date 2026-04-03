@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MyApp.Application.DTO.Pagination;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Persistence;
@@ -37,9 +38,31 @@ namespace MyApp.Infrastructure.Repository
             return true;
         }
 
-        public async Task<IEnumerable<SchoolYears>> getAllSchoolYearAsync()
+        public async Task<IEnumerable<SchoolYears>> getAllActiveSchoolYear()
         {
-            return await _context.SchoolYears.ToListAsync();
+            return await _context.SchoolYears.Where(s => s.IsActive).ToListAsync();
+        }
+
+        public async Task<(IEnumerable<SchoolYears>, int totalCounts)> getAllSchoolYearAsync(PaginationDTO dto)
+        {
+            var query = _context.SchoolYears.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrEmpty(dto.Search))
+            {
+                query = query.Where(s =>
+                s.Semester.Contains(dto.Search) ||
+                s.YearEnd.ToString().Contains(dto.Search) ||
+                s.YearEnd.ToString().Contains(dto.Search));
+            }
+
+            var totalCounts = await query.CountAsync();
+
+            var schoolyear = await query
+                .Skip((dto.PageNumber - 1) * dto.PageSize)
+                .Take(dto.PageSize)
+                .ToListAsync();
+
+            return (schoolyear, totalCounts);
         }
 
         public async Task<SchoolYears?> getSchoolYearByIDAsync(int id)

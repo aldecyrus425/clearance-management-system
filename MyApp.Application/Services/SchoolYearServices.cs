@@ -1,4 +1,5 @@
-﻿using MyApp.Application.DTO.Response;
+﻿using MyApp.Application.DTO.Pagination;
+using MyApp.Application.DTO.Response;
 using MyApp.Application.DTO.SchoolYear;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Application.Interfaces.Services;
@@ -32,9 +33,9 @@ namespace MyApp.Application.Services
             _officeRepository = officeRepository;
         }
 
-        public async Task<ResponseDTO<IEnumerable<ShowSchoolYearDTO>>> getAllSchoolYearAsync()
+        public async Task<ResponseDTO<IEnumerable<ShowSchoolYearDTO>>> getAllSchoolYearAsync(PaginationDTO dto)
         {
-            var schoolYears = await _schoolYearRepository.getAllSchoolYearAsync();
+            var (schoolYears, totalCounts) = await _schoolYearRepository.getAllSchoolYearAsync(dto);
 
             var result = schoolYears.Select(s => new ShowSchoolYearDTO
             {
@@ -47,7 +48,11 @@ namespace MyApp.Application.Services
             {
                 Success = true,
                 Message = "School years retrieved successfully",
-                Data = result
+                Data = result,
+                PageNumber = dto.PageNumber,
+                PageSize = dto.PageSize,
+                TotalRecords = totalCounts,
+                TotalPages = (int)Math.Ceiling(totalCounts / (double)dto.PageSize)
             };
         }
 
@@ -163,10 +168,9 @@ namespace MyApp.Application.Services
 
         public async Task<ResponseDTO<ShowSchoolYearDTO>> GetActiveSchoolYearAsync()
         {
-            var allYears = await _schoolYearRepository.getAllSchoolYearAsync();
-            var active = allYears.FirstOrDefault(s => s.IsActive);
-
-            if (active == null)
+            var allYears = await _schoolYearRepository.getAllActiveSchoolYear();
+            
+            if (allYears == null)
             {
                 return new ResponseDTO<ShowSchoolYearDTO>
                 {
@@ -176,36 +180,19 @@ namespace MyApp.Application.Services
                 };
             }
 
+            var active = allYears.Select(s => new ShowSchoolYearDTO
+            {
+                SchoolYearId = s.SchoolYearId,
+                SchoolYearDisplay = $"{s.YearStarted.Year}-{s.YearEnd.Year} {s.Semester}",
+                IsActive = s.IsActive
+            }).FirstOrDefault();
+
+
             return new ResponseDTO<ShowSchoolYearDTO>
             {
                 Success = true,
                 Message = "Active school year retrieved",
-                Data = new ShowSchoolYearDTO
-                {
-                    SchoolYearId = active.SchoolYearId,
-                    SchoolYearDisplay = $"{active.YearStarted.Year}-{active.YearEnd.Year} {active.Semester}",
-                    IsActive = active.IsActive
-                }
-            };
-        }
-
-        public async Task<ResponseDTO<IEnumerable<ShowSchoolYearDTO>>> GetSchoolYearsBySemesterAsync(string semester)
-        {
-            var allYears = await _schoolYearRepository.getAllSchoolYearAsync();
-            var filtered = allYears
-                .Where(s => string.Equals(s.Semester, semester, StringComparison.OrdinalIgnoreCase))
-                .Select(s => new ShowSchoolYearDTO
-                {
-                    SchoolYearId = s.SchoolYearId,
-                    SchoolYearDisplay = $"{s.YearStarted.Year}-{s.YearEnd.Year} {s.Semester}",
-                    IsActive = s.IsActive
-                });
-
-            return new ResponseDTO<IEnumerable<ShowSchoolYearDTO>>
-            {
-                Success = true,
-                Message = $"School years for {semester} semester retrieved",
-                Data = filtered
+                Data = active
             };
         }
 
@@ -213,29 +200,22 @@ namespace MyApp.Application.Services
         {
             try
             {
-                var allYears = await _schoolYearRepository.getAllSchoolYearAsync();
                 var target = await _schoolYearRepository.getSchoolYearByIDAsync(id);
 
                 if (target == null)
                     return new ResponseDTO<ShowSchoolYearDTO> { Success = false, Message = "School year not found" };
 
-                var activeYear = allYears.FirstOrDefault(s => s.IsActive);
-                if (activeYear != null && activeYear.SchoolYearId != id)
-                    activeYear.SetInactive();
-
                 target.SetActive();
                 await _schoolYearRepository.saveChangesAsync();
-
-                // --- AUTOMATIC CLEARANCE CREATION ---
-                var students = await _studentRepository.getAllStudentsAsync();
-                var offices = await _officeRepository.getAllOfficesAsync();
+                
+                var students = await _studentRepository.getAllStudents();
+                var offices = await _officeRepository.getAllOffices();
 
                 foreach (var student in students)
                 {
                     var clearance = new Clearances(student.StudentsId, target.SchoolYearId);
                     await _clearancesRepository.AddClearanceAsync(clearance);
 
-                    // create statuses for all offices
                     var statuses = offices.Select(o => new ClearanceStatuses(clearance.ClearanceId, o.OfficeId));
                     await _clearanceStatusRepository.addRangeAsync(statuses);
                 }

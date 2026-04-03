@@ -12,9 +12,12 @@ namespace MyApp.Domain.Entities
         public int UserId { get; private set; }
         public Users Users { get; private set; }
         public string StudentNumber { get; private set; }
-        public string Course { get; private set; }
-        public string YearLevel { get; private set; }
-        public string Section { get; private set; }
+        public int CourseId { get; private set; }
+        public Course Course { get; private set; }
+        public int YearLevelId { get; private set; }
+        public YearLevel YearLevel { get; private set; }
+        public int SectionId { get; private set; }
+        public Section Section { get; private set; }
         public string Status { get; private set; } // Active, Graduating, Dropped, etc.
         public DateTime CreatedAt { get; private set; }
 
@@ -40,7 +43,7 @@ namespace MyApp.Domain.Entities
             Status = "Graduate";
         }
 
-        public Students(int userID, string studentNumber, string course, string yearLevel, string section)
+        public Students(int userID, string studentNumber, int course, int yearLevel, int section)
         {
             if (userID <= 0)
                 throw new ArgumentException("User ID must be greater than 0.");
@@ -48,20 +51,20 @@ namespace MyApp.Domain.Entities
             if (string.IsNullOrWhiteSpace(studentNumber))
                 throw new ArgumentException("Student number is required.");
 
-            if (string.IsNullOrWhiteSpace(course))
-                throw new ArgumentException("Course is required.");
+            if (course <= 0)
+                throw new ArgumentException("Course ID is invalid.");
 
-            if (string.IsNullOrWhiteSpace(yearLevel))
-                throw new ArgumentException("Year level is required.");
+            if (yearLevel <= 0)
+                throw new ArgumentException("Year level is invalid.");
 
-            if (string.IsNullOrWhiteSpace(section))
-                throw new ArgumentException("Section is required.");
+            if (section <= 0)
+                throw new ArgumentException("Section is invalid.");
 
             UserId = userID;
             StudentNumber = studentNumber.Trim();
-            Course = course.Trim();
-            YearLevel = yearLevel.Trim();
-            Section = section.Trim();
+            CourseId = course;
+            YearLevelId = yearLevel;
+            SectionId = section;
             Status = "Deactivated";
             CreatedAt = DateTime.Now;
         }

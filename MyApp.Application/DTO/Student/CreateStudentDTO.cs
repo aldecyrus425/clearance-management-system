@@ -11,8 +11,8 @@ namespace MyApp.Application.DTO.Student
     {
         public CreateUserDTO User { get; set; }
         public string StudentNumber { get; set; }
-        public string Course { get; set; }
-        public string YearLevel { get; set; }
-        public string Section { get; set; }
+        public int Course { get; set; }
+        public int YearLevel { get; set; }
+        public int Section { get; set; }
     }
 }

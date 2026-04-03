@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MyApp.Application.DTO.Pagination;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Persistence;
@@ -27,11 +28,32 @@ namespace MyApp.Infrastructure.Repository
             return office;
         }
 
-        public async Task<IEnumerable<Offices>> getAllOfficesAsync()
+        public async Task<IEnumerable<Offices>> getAllOffices()
         {
-            return await _dbContext.Offices
+            return await _dbContext.Offices.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<(IEnumerable<Offices>, int totalCounts)> getAllOfficesAsync(PaginationDTO dto)
+        {
+            var query = _dbContext.Offices
                 .AsNoTracking()
+                .AsQueryable();
+
+            if(!string.IsNullOrEmpty(dto.Search))
+            {
+                query = query.Where(o => 
+                o.OfficeName.Contains(dto.Search) || 
+                o.Description.Contains(dto.Search));
+            }
+
+            var totalCounts = await query.CountAsync();
+
+            var offices = await query
+                .Skip((dto.PageNumber - 1) * dto.PageSize)
+                .Take(dto.PageSize)
                 .ToListAsync();
+
+            return (offices, totalCounts);
         }
 
         public async Task<Offices?> getOfficeByIDAsync(int id)

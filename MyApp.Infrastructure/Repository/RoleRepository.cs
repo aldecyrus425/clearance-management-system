@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MyApp.Application.DTO.Pagination;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Persistence;
@@ -29,11 +30,26 @@ namespace MyApp.Infrastructure.Repository {
             _dbContext.Roles.Remove(role); 
             return true; 
         } 
-        public async Task<IEnumerable<Roles>> getAllRolesAsync() 
+        public async Task<(IEnumerable<Roles>, int totalCounts)> getAllRolesAsync(PaginationDTO dto) 
         { 
-            return await _dbContext.Roles
+            var query = _dbContext.Roles
                 .AsNoTracking()
-                .ToListAsync(); 
+                .AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(dto.Search))
+            {
+                query = query.Where(r => 
+                r.RoleName.Contains(dto.Search));
+            }
+
+            var totalCounts = await query.CountAsync();
+
+            var roles = await query
+                .Skip((dto.PageNumber - 1) * dto.PageSize)
+                .Take(dto.PageSize)
+                .ToListAsync();
+
+            return (roles, totalCounts);
         } 
         public async Task<Roles?> getRolesByIDAsync(int id) 
         { 
